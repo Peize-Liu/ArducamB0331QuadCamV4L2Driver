@@ -1,0 +1,31 @@
+<launch>
+    <arg name="cap_device" default="0" />
+    <arg name="width" default="5120" />
+    <arg name="height" default="800" />
+    <arg name="fps" default="45" />
+    <arg name="enable_color" default="true" />
+    <arg name="publish_splited" default="false" />
+    <arg name="show" default="false" />
+    <arg name="print_clearness" default="false" />
+    <arg name="jpeg_quality" default="90" />
+    <arg name="is_sync" default="false" />
+    <arg name="exposure" default="400" />
+    <arg name="gain" default="1" />
+    <arg name="buffer_frame_number" default = "2" />
+
+    <param name="/arducam/image/compressed/jpeg_quality" value="$(arg jpeg_quality)" />
+    <node name="arducam_v4l2_ros" pkg="arducam_v4l2_ros" type="arducam_v4l2_ros_node" output="screen" >
+        <param name="cap_device" value="$(arg cap_device)" />
+        <param name="width" value="$(arg width)" />
+        <param name="height" value="$(arg height)" />
+        <param name="fps" value="$(arg fps)" />
+        <param name="enable_color" value="$(arg enable_color)" />
+        <param name="publish_splited" value="$(arg publish_splited)" />
+        <param name="show" value="$(arg show)" />
+        <param name="raw8" value="true" />
+        <param name="is_sync" value="$(arg is_sync)" />
+        <param name="exposure" value="$(arg exposure)" />
+        <param name="gain" value="$(arg gain)" />
+        <param name="print_clearness" value="$(arg print_clearness)" />
+    </node>
+</launch>
