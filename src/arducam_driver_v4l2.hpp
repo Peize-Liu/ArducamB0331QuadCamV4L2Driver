@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -71,4 +72,6 @@ class ArduCamV4L2Driver {
   ros::Time tstart_;
   ros::Timer grab_timer_;  
   image_transport::ImageTransport * image_transport_ = nullptr;
+  uint8_t* local_frame_addr = nullptr; //OpenCV has problem when dealing with mmap memory
+  size_t local_frame_size = -1;
 };

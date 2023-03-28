@@ -95,6 +95,7 @@ int32_t ArduCamV4L2Driver::Init(ros::NodeHandle & nh) {
 //Init buffer mmap, a frame a buffer, 
   struct v4l2_buffer camera_buffer;
   camera_buffer.length = camera_fmt.fmt.pix.width*camera_fmt.fmt.pix.height;
+  local_frame_size = camera_buffer.length;
   camera_buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   camera_buffer.memory = V4L2_MEMORY_MMAP;
   //mmap kernel memory and put memory back to kernel to let v4l2 to use
@@ -118,6 +119,12 @@ int32_t ArduCamV4L2Driver::Init(ros::NodeHandle & nh) {
     }
     ImageBufferNode new_node(frame_addr, camera_buffer.length, (uint32_t)0, i);
     buffer_vect_.push_back(new_node);
+  }
+//Init local_frame memory
+  local_frame_addr=(uint8_t*)malloc(local_frame_size);
+  if(local_frame_addr == nullptr){
+    printf("malloc frame addr failed\n");
+    return -11;
   }
 
 // Open Stream input
@@ -169,7 +176,8 @@ void ArduCamV4L2Driver::grab() {
       tstart_ = ros::Time::now();
   }
   auto ts = ros::Time::now();
-  cv::Mat frame(config_.width,config_.height,CV_8U,buffer_vect_[new_image.index].image_buffer_addr);
+  memcpy((uint8_t*)local_frame_addr,(uint8_t*)buffer_vect_[new_image.index].image_buffer_addr,local_frame_size);
+  cv::Mat frame(config_.width,config_.height,CV_8U,local_frame_addr); //占用极高的问题在于没有进行拷贝
 
   frame = convert(frame, config_.height); //占用及其高
   if(ioctl(cam_fd_,VIDIOC_QBUF,&new_image) < 0){
@@ -277,7 +285,7 @@ cv::Mat& convert(cv::Mat& raw_imag, int& rows) {
   gettimeofday(&start_time,NULL);
   cv::cvtColor(img, encode_image, cv::COLOR_BayerRG2BGR);
   gettimeofday(&end_time,NULL);
-  printf("use time: sec:%ld usec:%ld\n",(end_time.tv_sec-start_time.tv_sec), (end_time.tv_usec-start_time.tv_usec));
+  // printf("use time: usec:%ld\n",(end_time.tv_sec-start_time.tv_sec)*1000000 + (end_time.tv_usec-start_time.tv_usec));
   return encode_image;
 }
 
