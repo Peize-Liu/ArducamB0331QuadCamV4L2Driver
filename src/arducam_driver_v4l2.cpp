@@ -20,6 +20,9 @@ ArduCamV4L2Driver::~ArduCamV4L2Driver(){
   if(ioctl(cam_fd_,VIDIOC_STREAMOFF,&type) < 0){
     printf("Image caputure stop failed!\n");
   }
+  if(local_frame_addr != nullptr){
+    free(local_frame_addr);
+  }
   close(cam_fd_);
 }
 
